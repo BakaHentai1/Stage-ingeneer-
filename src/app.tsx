@@ -5,6 +5,8 @@ import { ModuleScreen, NotFound } from './screens/ModuleScreen';
 import { ToolScreen } from './screens/ToolScreen';
 import { ProjectDetail, Projects } from './screens/Projects';
 import { Settings } from './screens/Settings';
+import { RequestScreen } from './screens/Request';
+import { StockScreen } from './screens/Stock';
 import { Toast } from './ui/Toast';
 import { IconBox, IconFolder, IconGear, IconHome } from './ui/icons';
 
@@ -14,7 +16,8 @@ function View({ r }: { r: string[] }) {
   if (r[0] === 'm' && r[1] && r[2]) return <ToolScreen code={r[1]} toolId={r[2]} />;
   if (r[0] === 'projects' && !r[1]) return <Projects />;
   if (r[0] === 'projects' && r[1]) return <ProjectDetail id={r[1]} />;
-  if (r[0] === 'inventory') return <ModuleScreen code="d" />;
+  if (r[0] === 'inventory') return <StockScreen />;
+  if (r[0] === 'request') return <RequestScreen />;
   if (r[0] === 'settings') return <Settings />;
   return <NotFound />;
 }
