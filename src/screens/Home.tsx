@@ -45,6 +45,15 @@ export function Home() {
         </div>
       )}
 
+      <a class="rq-cta" href="#/request">
+        <span class="code">Z</span>
+        <span>
+          <b>Разбор заявки</b>
+          <span class="meta">Загрузите Word от начальника: что берём, чего не хватает, сборка по кейсам</span>
+        </span>
+        <span class="chev">›</span>
+      </a>
+
       <h2 class="h">Модули</h2>
       <div class="grid">
         {MODULES.map((m) => (
