@@ -448,3 +448,67 @@ details > summary { cursor: pointer; }
 .cn-head { flex-direction: row !important; align-items: center; gap: 12px !important; }
 .cn-photo { width: 100%; border-radius: 10px; border: 1px solid var(--line); }
 @media (min-width: 700px) { .cn-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* ---------- Модуль A: рисунки и таблицы ---------- */
+.fig { margin: 0 0 12px; }
+.fig figcaption, .figcap { font-size: 12.5px; color: var(--muted); margin: 0 0 6px; }
+.explain { margin: 0 0 6px; font-size: 14px; }
+.tbl tr.mark td { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.diagram.fg { width: 100%; height: auto; max-width: 600px; }
+.diagram .floor { stroke: var(--line-2); stroke-width: 1.5; }
+.diagram .aud { stroke: var(--ok); stroke-width: 4; stroke-linecap: round; opacity: .7; }
+.diagram .cab { fill: var(--panel-2); stroke: var(--accent); stroke-width: 1.2; }
+.diagram .ray { stroke-width: 1.2; }
+.diagram .r-axis { stroke: var(--accent); }
+.diagram .r-edge { stroke: var(--muted); stroke-dasharray: 4 4; }
+.diagram .r-ok { stroke: var(--ok); stroke-dasharray: 2 3; }
+.diagram .r-warn { stroke: var(--warn); stroke-dasharray: 2 3; }
+.diagram .dot { stroke: var(--bg); stroke-width: 1; }
+.diagram .d-ok { fill: var(--ok); }
+.diagram .d-warn { fill: var(--warn); }
+.diagram .d-crit { fill: var(--crit); }
+.diagram .room { fill: none; stroke: var(--line-2); stroke-width: 1.5; }
+.diagram .cone { stroke-width: 1; }
+.diagram .cone.c-main { fill: color-mix(in srgb, var(--accent) 16%, transparent); stroke: var(--accent); }
+.diagram .cone.c-sub { fill: color-mix(in srgb, var(--crit) 14%, transparent); stroke: var(--crit); }
+.diagram .cone.c-delay { fill: color-mix(in srgb, var(--info) 16%, transparent); stroke: var(--info); }
+.diagram .cone.c-fill { fill: color-mix(in srgb, var(--ok) 16%, transparent); stroke: var(--ok); }
+.diagram .src-b { stroke-width: 1.5; fill: var(--panel); }
+.diagram .src-b.c-main { stroke: var(--accent); }
+.diagram .src-b.c-sub { stroke: var(--crit); }
+.diagram .src-b.c-delay { stroke: var(--info); }
+.diagram .src-b.c-fill { stroke: var(--ok); }
+.diagram .zone-c { fill-opacity: .18; stroke-width: 1; stroke-dasharray: 3 3; }
+.diagram .z-warn { fill: var(--warn); stroke: var(--warn); }
+.diagram .z-crit { fill: var(--crit); stroke: var(--crit); }
+.diagram .pl { stroke-width: 1.2; stroke-dasharray: 5 4; }
+.diagram .l-warn { stroke: var(--warn); }
+.diagram .l-crit { stroke: var(--crit); }
+.diagram .l-ok { stroke: var(--ok); }
+.diagram .l-muted { stroke: var(--line-2); }
+.diagram .grid { stroke: var(--line); stroke-width: 1; }
+.diagram .ser { fill: none; stroke-width: 2; }
+.diagram .ser.dash { stroke-dasharray: 6 4; }
+.diagram .s-accent { stroke: var(--accent); fill: var(--accent); }
+.diagram .s-info { stroke: var(--info); fill: var(--info); }
+.diagram .s-ok { stroke: var(--ok); fill: var(--ok); }
+.diagram .s-warn { stroke: var(--warn); fill: var(--warn); }
+.diagram .s-crit { stroke: var(--crit); fill: var(--crit); }
+.diagram .s-muted { stroke: var(--muted); fill: var(--muted); }
+.diagram polyline.ser, .diagram line.ser { fill: none; }
+.diagram .w-plus { fill: none; stroke: var(--crit); stroke-width: 1.8; }
+.diagram .w-minus { fill: none; stroke: var(--info); stroke-width: 1.8; }
+.diagram .w-ser { stroke: var(--accent); stroke-width: 1.8; }
+.gear-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.gear-list .row { padding: 0; background: none; border: 0; }
+.gear-list .row small { color: var(--muted); }
+.spec { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: 13px; }
+.spec .k { color: var(--muted); }
+.cbl-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.cbl-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); font-size: 13px; }
+.cbl-item small { color: var(--muted); display: block; }
+@media print {
+  .calc { break-inside: auto; }
+  .calc .sec, .fig { break-inside: avoid; }
+  .diagram.fg { max-width: 15cm; max-height: 11cm; }
+}

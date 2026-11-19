@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { loadGear } from '../calc/audio/gear';
 import { makeBackup, markBackupDone, restoreBackup, validateBackup, type Backup } from '../core/backup';
 import { getSetting } from '../core/db';
 import { downloadText, stamp } from '../core/download';
@@ -56,6 +57,7 @@ export function Settings() {
   const restore = async () => {
     if (!pending) return;
     await restoreBackup(pending.b);
+    await loadGear();
     setPending(null);
     notifyProjectsChanged();
     toast('Данные восстановлены из копии');

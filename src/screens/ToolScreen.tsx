@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
+import { gearVersion, onGear } from '../calc/audio/gear';
 import { findModule, findTool } from '../modules/registry';
 import type { Values } from '../calc/types';
 import { CalcCard } from '../ui/CalcCard';
@@ -24,7 +25,9 @@ function ToolInner({ moduleCode, moduleTitle, toolId }: { moduleCode: string; mo
   const [values, setValues] = useState<Values>(() => ({ ...tool.defaults, ...(ls.get<Values>(toolKey(tool.id)) ?? {}) }));
   const [project] = useCurrentProject();
   const [asking, setAsking] = useState(false);
-  const result = useMemo(() => tool.compute(values), [values, tool]);
+  const [gv, setGv] = useState(gearVersion());
+  useEffect(() => onGear(() => setGv(gearVersion())), []);
+  const result = useMemo(() => tool.compute(values), [values, tool, gv]);
 
   const change = (k: string, v: string) => {
     const next = { ...values, [k]: v };
@@ -51,6 +54,8 @@ function ToolInner({ moduleCode, moduleTitle, toolId }: { moduleCode: string; mo
       <section class="panel no-print">
         <div class="panel-h"><span class="lbl">Исходные данные</span><button class="link" type="button" onClick={reset}>Сбросить</button></div>
         <ToolForm fields={tool.fields} values={values} onChange={change} />
+        {tool.panel ? tool.panel({ values, set: change }) : null}
+        {moduleCode === 'A' ? <p class="note"><a class="link" href="#/m/a/gear">База акустики и свои модели ›</a></p> : null}
       </section>
 
       <CalcCard title={tool.title} result={result} />

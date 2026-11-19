@@ -110,10 +110,46 @@ export function impedance(i: ImpedanceInput): CalcResult {
     }
   }
 
+  // Схема соединения.
+  const om = (z: number) => `${fx(z, z % 1 ? 1 : 0)} Ом`;
+  let groups: string[][];
+  if (i.mode === 'sp') groups = Array.from({ length: i.m }, () => Array.from({ length: i.n }, () => om(i.z)));
+  else if (i.mode === 'series') groups = [i.list.map(om)];
+  else groups = i.list.map((z) => [om(z)]);
+
+  // Сравнение всех схем для того же числа одинаковых кабинетов.
+  const z1 = i.mode === 'sp' ? i.z : new Set(i.list).size === 1 ? i.list[0] : NaN;
+  const tables: CalcResult['tables'] = [];
+  if (Number.isFinite(z1) && countSpk <= 64) {
+    const rows: (string | number)[][] = [];
+    let mark: number | undefined;
+    for (let n = 1; n <= countSpk; n++) {
+      if (countSpk % n) continue;
+      const m = countSpk / n;
+      const zt = seriesParallelZ(z1, n, m);
+      const okAmp = !(i.ampMin > 0) || zt >= i.ampMin - 1e-9;
+      const name = n === 1 ? `все ${m} параллельно` : m === 1 ? `все ${n} последовательно` : `групп: ${m}, в каждой ${n} последовательно`;
+      const cur = (i.mode === 'sp' && n === i.n) || (i.mode === 'series' && m === 1) || (i.mode === 'parallel' && n === 1);
+      if (cur) mark = rows.length;
+      rows.push([name, fx(zt, 2), okAmp ? (zt > 16 ? 'можно, но мощность мала' : 'подходит') : 'нельзя: ниже мин. нагрузки']);
+    }
+    tables.push({ title: `Все схемы для ${countSpk} кабинетов по ${om(z1)}`, head: ['Схема', 'Z общ, Ом', 'Для усилителя'], rows, mark });
+  }
+
   return {
     formulas,
     inputs,
     results,
+    explain: [
+      i.mode === 'series'
+        ? 'Последовательно сопротивления складываются: нагрузка растёт, усилитель отдаёт меньше мощности, а если один кабинет оборвётся — замолчат все.'
+        : i.mode === 'parallel'
+          ? 'Параллельно нагрузка уменьшается: каждый новый кабинет «открывает ещё одну дверь» для тока. Слишком малая нагрузка перегружает усилитель.'
+          : 'Последовательно-параллельная схема позволяет подключить больше кабинетов, сохранив нагрузку в допустимых пределах.',
+      i.ampMin > 0 ? `Общая нагрузка ${fx(total, 2)} Ом, усилитель допускает от ${rn(i.ampMin)} Ом — ${level === 'crit' ? 'так подключать нельзя.' : 'подключение допустимо.'}` : 'Укажите минимальную нагрузку усилителя, чтобы проверить совместимость.',
+    ],
+    figures: [{ kind: 'wiring', title: 'Схема подключения к каналу усилителя', groups, amp: 'Усилитель' }],
+    tables,
     limits: [
       'Используется номинальный импеданс. Реальный импеданс зависит от частоты и на отдельных частотах бывает на 15–25 % ниже номинала.',
       'Сопротивление кабеля не учтено (см. расчёт потерь в кабеле).',

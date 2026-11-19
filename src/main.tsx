@@ -8,6 +8,8 @@ import '@fontsource/unbounded/500.css';
 import '@fontsource/unbounded/700.css';
 import './styles.css';
 import { App } from './app';
+import { loadGear } from './calc/audio/gear';
 
 registerSW({ immediate: true });
+void loadGear();
 render(<App />, document.getElementById('app')!);

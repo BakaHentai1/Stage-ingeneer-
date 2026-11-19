@@ -23,9 +23,15 @@ export function calcRows(title: string, r: CalcResult): string[][] {
   rows.push(['Раздел', 'Параметр', 'Значение', 'Ед.']);
   r.inputs.forEach((v) => rows.push(valueRow('Исходные данные', v)));
   r.results.forEach((v) => rows.push(valueRow('Результат', v)));
+  r.explain?.forEach((t) => rows.push(['Пояснение', t, '', '']));
   r.formulas.forEach((f) => rows.push(['Формула', f, '', '']));
   r.limits.forEach((l) => rows.push(['Ограничение', l, '', '']));
   r.warnings.forEach((w) => rows.push(['Предупреждение', w.text, '', '']));
+  r.tables?.forEach((t) => {
+    rows.push(['Таблица', t.title, '', '']);
+    rows.push(t.head);
+    t.rows.forEach((x) => rows.push(x.map((c) => (typeof c === 'number' ? String(Math.round(c * 100) / 100).replace('.', ',') : c))));
+  });
   return rows;
 }
 

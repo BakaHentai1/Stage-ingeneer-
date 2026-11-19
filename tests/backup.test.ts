@@ -46,6 +46,6 @@ describe('CSV', () => {
     expect(s.startsWith('﻿')).toBe(true);
     expect(s).toContain('"a;b";"c""d"');
     const csv = calcToCsv('SPL', splTool.compute(splTool.defaults));
-    expect(csv).toMatch(/Уровень на расстоянии r;\d+,\d;дБ SPL/);
+    expect(csv).toMatch(/Длительный уровень на r;\d+,\d;дБ SPL/);
   });
 });

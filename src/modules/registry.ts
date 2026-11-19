@@ -21,6 +21,7 @@ export const MODULES: ModuleDef[] = [
   {
     code: 'A', title: 'Audio Calculator', desc: 'акустика, сабы, усилители, кабели, SPL', status: 'ready', tools: audioTools,
     planned: [],
+    screens: [{ id: 'gear', title: 'База акустики', short: 'RCF HDL 20-A, SUB 8006-AS, ART 912-A/915-A и свои модели' }],
   },
   {
     code: 'B', title: 'Схемы коммутации', desc: 'схема, Patch List, список кабелей', status: 'ready', tools: [],
