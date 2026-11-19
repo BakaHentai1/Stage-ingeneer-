@@ -16,6 +16,7 @@ import { ToneScreen } from './screens/assist/Tone';
 import { TasksScreen } from './screens/assist/Tasks';
 import { BuilderScreen } from './screens/assist/Builder';
 import { ConnectorsScreen } from './screens/assist/Connectors';
+import { GearScreen } from './screens/Gear';
 
 const C_SCREENS: Record<string, () => preact.JSX.Element> = {
   patch: PatchingScreen, routing: RoutingScreen, builder: BuilderScreen, trainer: TrainerScreen,
@@ -28,6 +29,7 @@ function View({ r }: { r: string[] }) {
   if (r.length === 0) return <Home />;
   if (r[0] === 'm' && r[1] && !r[2]) return <ModuleScreen code={r[1]} />;
   if (r[0] === 'm' && r[1] === 'b' && r[2] === 'wiring') return <WiringScreen />;
+  if (r[0] === 'm' && r[1] === 'a' && r[2] === 'gear') return <GearScreen />;
   if (r[0] === 'm' && r[1] === 'c' && r[2] && C_SCREENS[r[2]]) {
     const S = C_SCREENS[r[2]];
     return <S />;

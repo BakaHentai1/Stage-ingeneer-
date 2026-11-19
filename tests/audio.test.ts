@@ -95,7 +95,7 @@ describe('Сабвуферы', () => {
   });
   it('уровень с найденным количеством не ниже цели', () => {
     const r = subwoofers({ maxSpl: 131, target: 115, distance: 30, headroom: 3 });
-    expect(byLabel(r, 'Уровень с этим') as number).toBeGreaterThanOrEqual(118);
+    expect(byLabel(r, 'Уровень на r') as number).toBeGreaterThanOrEqual(118);
   });
 });
 

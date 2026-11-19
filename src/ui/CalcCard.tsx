@@ -1,5 +1,6 @@
 import type { CalcResult, CalcValue } from '../calc/types';
 import { fmtValue } from '../core/format';
+import { FigureView, TableView } from './Figure';
 
 function ValueRow({ v }: { v: CalcValue }) {
   return (
@@ -49,6 +50,27 @@ export function CalcCard({ title, result, subtitle }: { title: string; result: C
         ) : null}
         <div class="kvs">{rest.map((v) => <ValueRow v={v} />)}</div>
       </div>
+
+      {result.explain?.length ? (
+        <div class="sec">
+          <div class="lbl">Простыми словами</div>
+          {result.explain.map((t) => <p class="explain">{t}</p>)}
+        </div>
+      ) : null}
+
+      {result.figures?.length ? (
+        <div class="sec">
+          <div class="lbl">Схемы и графики</div>
+          {result.figures.map((f) => <FigureView f={f} />)}
+        </div>
+      ) : null}
+
+      {result.tables?.length ? (
+        <div class="sec">
+          <div class="lbl">Сравнение и списки</div>
+          {result.tables.map((t) => <TableView t={t} />)}
+        </div>
+      ) : null}
 
       <div class="sec">
         <div class="lbl">Формула</div>

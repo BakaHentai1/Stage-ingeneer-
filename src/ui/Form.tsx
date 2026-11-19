@@ -13,7 +13,7 @@ export function ToolForm({ fields, values, onChange }: { fields: FieldDef[]; val
             </span>
             {f.type === 'select' ? (
               <select id={id} value={values[f.key]} onChange={(e) => onChange(f.key, (e.currentTarget as HTMLSelectElement).value)}>
-                {f.options!.map((o) => <option value={o.value}>{o.label}</option>)}
+                {(f.optionsFn ? f.optionsFn(values) : f.options ?? []).map((o) => <option value={o.value}>{o.label}</option>)}
               </select>
             ) : (
               <input
