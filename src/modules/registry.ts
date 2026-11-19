@@ -12,6 +12,8 @@ export interface ModuleDef {
   tools: ToolDef[];
   /** Что появится в модуле (для ещё не готовых). */
   planned: string[];
+  /** Отдельные экраны модуля (не калькуляторы). */
+  screens?: { id: string; title: string; short: string }[];
 }
 
 export const MODULES: ModuleDef[] = [
@@ -20,11 +22,12 @@ export const MODULES: ModuleDef[] = [
     planned: [],
   },
   {
-    code: 'B', title: 'Схемы коммутации', desc: 'схема, Patch List, список кабелей', status: 'next', tools: [],
-    planned: ['Пульт и стейджбокс', 'XLR, Jack TRS, RCA, UTP', 'Активная и пассивная акустика, усилители', 'Мониторы, сабвуферы, микрофоны', 'Визуальная схема подключения', 'Patch List и список кабелей с экспортом'],
+    code: 'B', title: 'Схемы коммутации', desc: 'схема, Patch List, список кабелей', status: 'ready', tools: [],
+    planned: [],
+    screens: [{ id: 'wiring', title: 'Генератор схем коммутации', short: 'Patch List, выходы, кабели, схема' }],
   },
   {
-    code: 'C', title: 'Помощник звукорежиссёра', desc: 'Gain, EQ, динамика, фидбэк', status: 'planned', tools: [],
+    code: 'C', title: 'Помощник звукорежиссёра', desc: 'Gain, EQ, динамика, фидбэк', status: 'next', tools: [],
     planned: ['Gain staging для Qu-16, Qu-24 и аналоговых пультов', 'EQ, HPF, LPF по источникам', 'Компрессор и Gate', 'Поиск причин фонового шума', 'Диагностика обратной связи', 'Мониторные линии и маршрутизация'],
   },
   {

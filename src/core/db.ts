@@ -23,6 +23,16 @@ export interface SavedCalc {
   createdAt: number;
 }
 
+/** Сохранённый документ модуля (например, схема коммутации), привязанный к проекту. */
+export interface SavedDoc {
+  id: string;
+  projectId: string;
+  kind: 'wiring';
+  title: string;
+  data: unknown;
+  createdAt: number;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -32,31 +42,38 @@ interface StageDB extends DBSchema {
   projects: { key: string; value: Project };
   calcs: { key: string; value: SavedCalc; indexes: { byProject: string } };
   settings: { key: string; value: Setting };
+  docs: { key: string; value: SavedDoc; indexes: { byProject: string } };
   // Хранилища для модулей D (склад) и далее — создаются заранее, чтобы не было миграций.
   inventory: { key: string; value: Record<string, unknown> & { id: string } };
   kits: { key: string; value: Record<string, unknown> & { id: string } };
   movements: { key: string; value: Record<string, unknown> & { id: string } };
 }
 
-export const STORES = ['projects', 'calcs', 'settings', 'inventory', 'kits', 'movements'] as const;
+export const STORES = ['projects', 'calcs', 'docs', 'settings', 'inventory', 'kits', 'movements'] as const;
 export type StoreName = (typeof STORES)[number];
 
 const DB_NAME = 'stage-engineer';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbp: Promise<IDBPDatabase<StageDB>> | null = null;
 
 export function db(): Promise<IDBPDatabase<StageDB>> {
   if (!dbp) {
     dbp = openDB<StageDB>(DB_NAME, DB_VERSION, {
-      upgrade(d) {
-        d.createObjectStore('projects', { keyPath: 'id' });
-        const calcs = d.createObjectStore('calcs', { keyPath: 'id' });
-        calcs.createIndex('byProject', 'projectId');
-        d.createObjectStore('settings', { keyPath: 'key' });
-        d.createObjectStore('inventory', { keyPath: 'id' });
-        d.createObjectStore('kits', { keyPath: 'id' });
-        d.createObjectStore('movements', { keyPath: 'id' });
+      upgrade(d, oldVersion) {
+        if (oldVersion < 1) {
+          d.createObjectStore('projects', { keyPath: 'id' });
+          const calcs = d.createObjectStore('calcs', { keyPath: 'id' });
+          calcs.createIndex('byProject', 'projectId');
+          d.createObjectStore('settings', { keyPath: 'key' });
+          d.createObjectStore('inventory', { keyPath: 'id' });
+          d.createObjectStore('kits', { keyPath: 'id' });
+          d.createObjectStore('movements', { keyPath: 'id' });
+        }
+        if (oldVersion < 2) {
+          const docs = d.createObjectStore('docs', { keyPath: 'id' });
+          docs.createIndex('byProject', 'projectId');
+        }
       },
     });
   }
@@ -96,9 +113,11 @@ export async function saveProject(p: Partial<Project> & { name: string }): Promi
 
 export async function deleteProject(id: string): Promise<void> {
   const d = await db();
-  const tx = d.transaction(['projects', 'calcs'], 'readwrite');
+  const tx = d.transaction(['projects', 'calcs', 'docs'], 'readwrite');
   const keys = await tx.objectStore('calcs').index('byProject').getAllKeys(id);
   await Promise.all(keys.map((k) => tx.objectStore('calcs').delete(k)));
+  const docKeys = await tx.objectStore('docs').index('byProject').getAllKeys(id);
+  await Promise.all(docKeys.map((k) => tx.objectStore('docs').delete(k)));
   await tx.objectStore('projects').delete(id);
   await tx.done;
   if ((await getSetting<string>('currentProjectId')) === id) await setSetting('currentProjectId', null);
@@ -126,6 +145,26 @@ export async function countCalcs(projectId: string): Promise<number> {
 
 export async function deleteCalc(id: string): Promise<void> {
   await (await db()).delete('calcs', id);
+}
+
+/* ---------- Документы модулей ---------- */
+
+export async function saveDoc(doc: Omit<SavedDoc, 'id' | 'createdAt'>): Promise<SavedDoc> {
+  const full: SavedDoc = { ...doc, id: uid(), createdAt: Date.now() };
+  const d = await db();
+  await d.put('docs', full);
+  const p = await d.get('projects', doc.projectId);
+  if (p) await d.put('projects', { ...p, updatedAt: Date.now() });
+  return full;
+}
+
+export async function listDocs(projectId: string): Promise<SavedDoc[]> {
+  const all = await (await db()).getAllFromIndex('docs', 'byProject', projectId);
+  return all.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function deleteDoc(id: string): Promise<void> {
+  await (await db()).delete('docs', id);
 }
 
 /* ---------- Настройки ---------- */
