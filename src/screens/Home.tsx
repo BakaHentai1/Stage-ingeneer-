@@ -68,6 +68,7 @@ export function Home() {
 
       <h2 class="h">Быстрые расчёты</h2>
       <div class="quick">
+        <a class="q" href="#/m/b/wiring">Схема коммутации</a>
         {audio.tools.map((t) => (
           <a class="q" href={`#/m/a/${t.id}`}>{t.title}</a>
         ))}

@@ -256,3 +256,61 @@ label.btn input[type=file] { display: none; }
   .rq-check { border-color: #555; }
   .rq-pic img { filter: none; }
 }
+
+/* ---------- Модуль B ---------- */
+.chip-btn { all: unset; cursor: pointer; font-size: 12.5px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line-2); background: var(--panel-2); }
+.chip-btn:focus-visible { outline: 2px solid var(--accent); }
+.src-list { display: flex; flex-direction: column; gap: 6px; }
+.src { display: grid; grid-template-columns: 22px 1fr auto; grid-template-areas: "n name act" "n kind st"; gap: 6px 8px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
+.src-n { grid-area: n; color: var(--muted); font-size: 12px; align-self: start; padding-top: 12px; }
+.src-name { grid-area: name; min-width: 0; }
+.src-kind { grid-area: kind; min-width: 0; }
+.src-st { grid-area: st; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.src-st input { width: 20px; height: 20px; min-height: 0; accent-color: var(--accent); }
+.src-act { grid-area: act; display: flex; gap: 4px; }
+.icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg); cursor: pointer; font-size: 16px; line-height: 1; }
+.icon-btn:disabled { opacity: .35; cursor: default; }
+.icon-btn.danger { color: var(--crit); }
+input[aria-invalid="true"] { border-color: var(--crit); }
+
+.usage { display: flex; flex-direction: column; gap: 8px; }
+.use { display: grid; grid-template-columns: minmax(0, 1fr) 90px 52px; align-items: center; gap: 10px; font-size: 13px; }
+.use .k { color: var(--muted); }
+.use .bar { height: 6px; border-radius: 3px; background: var(--bg); overflow: hidden; }
+.use .bar i { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
+.use.over .bar i { background: var(--crit); }
+.use.over .v { color: var(--crit); }
+.use .v { text-align: right; }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 12.5px; min-width: 520px; }
+.tbl th, .tbl td { text-align: left; padding: 7px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+.tbl th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 11.5px; border-top: 0; white-space: nowrap; }
+.ph48 { color: var(--warn); font-size: 11.5px; white-space: nowrap; }
+
+.diagram-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.diagram { display: block; font-family: var(--f-mono); }
+.diagram .zone { fill: var(--muted); font-size: 11px; letter-spacing: .12em; font-weight: 600; }
+.diagram .zone-line { stroke: var(--line); stroke-dasharray: 4 4; }
+.diagram .sub { fill: var(--muted); font-size: 10.5px; }
+.diagram .node { fill: var(--panel-2); stroke: var(--line-2); }
+.diagram .node.spk { stroke: var(--info); }
+.diagram .node.amp { stroke: var(--crit); }
+.diagram .t { fill: var(--fg); font-size: 11px; }
+.diagram .ph { fill: var(--warn); font-size: 10px; }
+.diagram .lbl { fill: var(--muted); font-size: 10px; }
+.diagram .box { fill: var(--panel); stroke: var(--accent); stroke-width: 1.5; }
+.diagram .box.dashed { stroke-dasharray: 6 4; }
+.diagram .box.mixer { stroke: var(--ok); }
+.diagram .bt { fill: var(--fg); font-size: 13px; font-weight: 500; }
+.diagram .w-mic { stroke: var(--accent); stroke-width: 1.5; }
+.diagram .w-line { stroke: var(--info); stroke-width: 1.5; }
+.diagram .w-utp { stroke: var(--ok); stroke-width: 4; }
+.diagram .w-multi { stroke: var(--accent); stroke-width: 6; }
+.diagram .arrow { fill: var(--info); }
+@media print {
+  .diagram-wrap { overflow: visible; border: 0; }
+  .diagram { width: 100%; height: auto; }
+  .tbl { overflow: visible; }
+  .tbl table { min-width: 0; }
+}

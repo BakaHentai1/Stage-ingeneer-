@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
-import { deleteCalc, deleteProject, getProject, listCalcs, listProjects, saveProject, type Project, type SavedCalc } from '../core/db';
+import { deleteCalc, deleteDoc, deleteProject, getProject, listCalcs, listDocs, listProjects, saveProject, type Project, type SavedCalc, type SavedDoc } from '../core/db';
+import { generate, type Rig } from '../wiring/model';
+import { wiringRows } from '../wiring/export';
+import { WIRING_KEY } from './Wiring';
 import { ls, notifyProjectsChanged, setCurrentProject, toast, useCurrentProject } from '../core/state';
 import { fmtDate } from '../core/format';
 import { NewProjectForm } from '../ui/ProjectPicker';
@@ -47,6 +50,7 @@ export function Projects() {
 export function ProjectDetail({ id }: { id: string }) {
   const [p, setP] = useState<Project | null | undefined>(undefined);
   const [calcs, setCalcs] = useState<SavedCalc[]>([]);
+  const [docs, setDocs] = useState<SavedDoc[]>([]);
   const [current] = useCurrentProject();
   const [editing, setEditing] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -55,6 +59,7 @@ export function ProjectDetail({ id }: { id: string }) {
   const load = async () => {
     setP((await getProject(id)) ?? null);
     setCalcs(await listCalcs(id));
+    setDocs(await listDocs(id));
   };
   useEffect(() => {
     load();
@@ -68,6 +73,10 @@ export function ProjectDetail({ id }: { id: string }) {
     calcs.forEach((c) => {
       rows.push(['', '', '', '']);
       rows.push(...calcRows(c.title, c.result));
+    });
+    docs.forEach((d) => {
+      rows.push(['', '', '', '']);
+      rows.push(...wiringRows(d.title, generate(d.data as Rig)).map((r) => r.map(String)));
     });
     downloadText(`${safeName(p.name)}_${stamp()}.csv`, toCsv(rows), 'text/csv');
   };
@@ -98,9 +107,26 @@ export function ProjectDetail({ id }: { id: string }) {
       <div class="actions no-print">
         {current?.id !== p.id ? <button class="btn primary" type="button" onClick={() => setCurrentProject(p.id)}>Сделать текущим</button> : <span class="chip ok">текущий проект</span>}
         <button class="btn" type="button" onClick={() => setEditing(true)}>Изменить</button>
-        <button class="btn" type="button" onClick={exportCsv} disabled={!calcs.length}>CSV</button>
+        <button class="btn" type="button" onClick={exportCsv} disabled={!calcs.length && !docs.length}>CSV</button>
         <button class="btn" type="button" onClick={() => { setOpen('all'); setTimeout(() => window.print(), 50); }} disabled={!calcs.length}>PDF</button>
       </div>
+
+      {docs.length ? (
+        <>
+          <h2 class="h">Схемы коммутации ({docs.length})</h2>
+          <div class="list">
+            {docs.map((d) => (
+              <div class="row">
+                <span><b>{d.title}</b><span class="meta">{new Date(d.createdAt).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}</span></span>
+                <span class="actions no-print">
+                  <button class="btn" type="button" onClick={() => { ls.set(WIRING_KEY, d.data); go('/m/b/wiring'); }}>Открыть</button>
+                  <button class="icon-btn danger" type="button" aria-label="Удалить схему" onClick={async () => { await deleteDoc(d.id); await load(); }}>×</button>
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
 
       <h2 class="h">Расчёты ({calcs.length})</h2>
       {calcs.length === 0 ? <p class="note">Откройте любой калькулятор и нажмите «Сохранить в проект».</p> : null}
@@ -129,7 +155,7 @@ export function ProjectDetail({ id }: { id: string }) {
       <div class="danger-zone no-print">
         {confirmDel ? (
           <div class="panel">
-            <p>Удалить проект «{p.name}» и все его расчёты ({calcs.length})? Отменить будет нельзя.</p>
+            <p>Удалить проект «{p.name}», его расчёты ({calcs.length}) и схемы ({docs.length})? Отменить будет нельзя.</p>
             <div class="actions">
               <button class="btn danger" type="button" onClick={remove}>Удалить навсегда</button>
               <button class="btn" type="button" onClick={() => setConfirmDel(false)}>Отмена</button>
