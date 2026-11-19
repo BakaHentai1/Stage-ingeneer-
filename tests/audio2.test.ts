@@ -148,3 +148,126 @@ describe('Импеданс: схема и сравнение', () => {
     expect(f.kind === 'wiring' && f.groups.length).toBe(2);
   });
 });
+
+/* ---------------- Калькуляторы 5–9 ---------------- */
+import { cableLength, cableLoss, cableLengthTool, cableEnd, checkPorts, aggregate, lossRow, RHO_CCA } from '../src/calc/audio/cable';
+import { coverage, qMolloy, criticalDistance } from '../src/calc/audio/coverage';
+import { splAtDistance, nearFieldLimit, lineArrayLoss, splTool } from '../src/calc/audio/spl';
+import { delayLine, delayTool } from '../src/calc/audio/delay';
+import { calcToCsv } from '../src/core/csv';
+
+describe('Кабели: разъёмы и список', () => {
+  it('XLR: на выходе прибора кабель «мама», на входе «папа»', () => {
+    expect(cableEnd('xlr3', 'src')).toBe('XLR3 мама');
+    expect(cableEnd('xlr3', 'dst')).toBe('XLR3 папа');
+  });
+  it('симметричный XLR в RCA — предупреждение о несимметричной линии', () => {
+    expect(checkPorts('line-bal', 'xlr3', 'rca').some((w) => w.text.includes('несимметричной'))).toBe(true);
+    expect(checkPorts('mic', 'xlr3', 'xlr3')).toEqual([]);
+  });
+  it('запас на концы: (12 + 2)·1,15 + 2·1 = 18,1 м → 20 м', () => {
+    const r = cableLength({ horizontal: 12, vertical: 2, reservePct: 15, runs: 1, type: 'mic', endReserve: 1 });
+    expect(primary(r) as number).toBeCloseTo(18.1, 10);
+    expect(byLabel(r, 'Готовый кабель')).toBe(20);
+  });
+  it('сводка: одинаковые кабели складываются', () => {
+    const rows = aggregate([
+      { purpose: 'A', type: 'mic', src: 'xlr3', dst: 'xlr3', len: 8, runs: 4 },
+      { purpose: 'B', type: 'mic', src: 'xlr3', dst: 'xlr3', len: 9.5, runs: 2 },
+      { purpose: 'C', type: 'mic', src: 'xlr3', dst: 'xlr3', len: 12, runs: 1 },
+    ]);
+    expect(rows).toEqual([
+      ['Микрофонный, симметричный', 'XLR3 мама — XLR3 папа', '10 м', '6 шт'],
+      ['Микрофонный, симметричный', 'XLR3 мама — XLR3 папа', '15 м', '1 шт'],
+    ]);
+  });
+  it('список попадает в таблицы и CSV', () => {
+    const list = JSON.stringify([{ purpose: 'Вокал', type: 'mic', src: 'xlr3', dst: 'xlr3', len: 16.1, runs: 2 }]);
+    const r = cableLengthTool.compute({ ...cableLengthTool.defaults, list });
+    expect(r.tables?.length).toBe(2);
+    expect(calcToCsv('Кабели', r)).toContain('Вокал');
+  });
+});
+
+describe('Потери в кабеле: сравнение', () => {
+  it('2 кабинета по 8 Ом на 25 м 2,5 мм²: R = 0,35 Ом, нагрузка 4 Ом, 20·lg(4,35/4) = 0,7286 дБ', () => {
+    const r = cableLoss({ length: 25, section: 2.5, z: 8, lossMax: 0.5, count: 2 });
+    expect(primary(r) as number).toBeCloseTo(0.7286, 4);
+    expect(byLabel(r, 'Потери напряжения') as number).toBeCloseTo((0.35 / 4.35) * 100, 6);
+  });
+  it('CCA: сопротивление в 0,028/0,0175 = 1,6 раза выше', () => {
+    expect(lossRow(10, 1.5, 8, RHO_CCA).r / lossRow(10, 1.5, 8, 0.0175).r).toBeCloseTo(1.6, 6);
+  });
+  it('нагрев до 50 °C: ρ = 0,0175·(1 + 0,00393·30) = 0,019563', () => {
+    const r = cableLoss({ length: 20, section: 2.5, z: 8, lossMax: 0.5, temp: 50 });
+    expect(byLabel(r, 'Сопротивление линии') as number).toBeCloseTo((2 * 0.0175 * 1.1179 * 20) / 2.5, 6);
+  });
+  it('таблица всех сечений с отметкой рекомендуемого', () => {
+    const r = cableLoss({ length: 50, section: 2.5, z: 8, lossMax: 0.5 });
+    expect(r.tables![0].rows.length).toBe(7);
+    expect(r.tables![0].mark).toBe(4); // 4 мм²
+  });
+});
+
+describe('Покрытие: зал', () => {
+  it('Q по Molloy для 90° × 40°: 180 / arcsin(sin45°·sin20°) = 12,86', () => {
+    expect(qMolloy(90, 40)).toBeCloseTo(12.86, 2);
+  });
+  it('r_c = 0,057·√(12,86·6000/2) = 11,2 м', () => {
+    expect(criticalDistance(12.86, 6000, 2)).toBeCloseTo(0.057 * Math.sqrt(12.86 * 3000), 6);
+  });
+  it('дыра по центру: порталы ±5 м, 90°, без разворота → покрытие сходится на 5 / tg45° = 5 м', () => {
+    const r = coverage({ hAngle: 90, vAngle: 40, speakerH: 2.8, earH: 1.2, dNear: 3, dFar: 20, offset: 5 });
+    expect(byLabel(r, 'Покрытие порталов сходится') as number).toBeCloseTo(5, 6);
+    expect(r.warnings.some((w) => w.text.includes('front-fill'))).toBe(true);
+  });
+  it('боковые стены: зал 20 м, порталы ±5 м, 90° → стены с (10 − 5)/tg45° = 5 м', () => {
+    const r = coverage({ hAngle: 90, vAngle: 40, speakerH: 2.8, earH: 1.2, dNear: 3, dFar: 20, offset: 5, roomW: 20 });
+    expect(byLabel(r, 'Покрытие доходит до боковых') as number).toBeCloseTo(5, 6);
+  });
+  it('эхо задней стены: зал 30 м, первый ряд 3 м → 2·27/343 = 157 мс', () => {
+    const r = coverage({ hAngle: 90, vAngle: 40, speakerH: 2.8, earH: 1.2, dNear: 3, dFar: 25, roomL: 30 });
+    expect(byLabel(r, 'Запаздывание отражения') as number).toBeCloseTo((54 / 343) * 1000, 6);
+  });
+  it('зал короче последнего ряда — ошибка', () => {
+    expect(coverage({ hAngle: 90, vAngle: 40, speakerH: 2.8, earH: 1.2, dNear: 3, dFar: 25, roomL: 20 }).error).toBeTruthy();
+  });
+});
+
+describe('SPL: пиковый и длительный', () => {
+  it('ART 912-A, 20 м: пик 130 − 26,02 = 103,98; длительный 124 − 26,02 = 97,98', () => {
+    const r = splTool.compute({ ...splTool.defaults, gear: 'rcf-art912a', distance: '20' });
+    expect(primary(r) as number).toBeCloseTo(97.979, 3);
+    expect(byLabel(r, 'Пиковый уровень на r') as number).toBeCloseTo(103.979, 3);
+  });
+  it('пассивный: пики выше паспорта — предупреждение', () => {
+    const r = splAtDistance({ sens: 98, power: 500, distance: 10, count: 1, sum: 'incoherent', model: 'point', maxSpl: 128, crest: 6 });
+    // 98 + 27 = 124,99 длительно; пик 130,99 > 128
+    expect(byLabel(r, 'Один кабинет на 1 м, пиковый')).toBe(128);
+    expect(r.warnings.some((w) => w.text.includes('упрутся'))).toBe(true);
+  });
+  it('ближняя зона массива: 2,4 м, 1 кГц → 2,4²·1000/686 = 8,4 м; на 33,6 м потери 10·lg 8,4 + 20·lg 4', () => {
+    const rt = nearFieldLimit(2.4, 1000);
+    expect(rt).toBeCloseTo(8.3965, 3);
+    expect(lineArrayLoss(4 * rt, rt)).toBeCloseTo(10 * Math.log10(rt) + 20 * Math.log10(4), 10);
+    expect(lineArrayLoss(rt / 2, rt)).toBeCloseTo(10 * Math.log10(rt / 2), 10);
+  });
+  it('когерентное сложение — предупреждение об условиях', () => {
+    const r = splAtDistance({ sens: 98, power: 100, distance: 10, count: 2, sum: 'coherent', model: 'point', maxSpl: 0 });
+    expect(r.warnings.some((w) => w.text.includes('¼ длины волны'))).toBe(true);
+  });
+});
+
+describe('Delay: геометрия', () => {
+  it('по высотам: √(30² + 3²) = 30,15 м → 30,15/343,42·1000 = 87,79 мс + 10', () => {
+    const r = delayLine({ distance: 0, temp: 20, offset: 10, sampleRate: 48000, geom: { mainH: 8, delayH: 5, horiz: 30 } });
+    expect(byLabel(r, 'Расстояние по прямой') as number).toBeCloseTo(Math.hypot(30, 3), 10);
+    expect(primary(r) as number).toBeCloseTo((Math.hypot(30, 3) / 343.42) * 1000 + 10, 6);
+  });
+  it('схема: delay с задержкой приходит позже main ровно на добавку', () => {
+    const r = delayTool.compute(delayTool.defaults);
+    const f = r.figures![0];
+    if (f.kind !== 'timeline') throw new Error();
+    expect(f.events[2].t - f.events[1].t).toBeCloseTo(10, 6);
+  });
+});

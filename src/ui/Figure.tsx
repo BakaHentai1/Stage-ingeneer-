@@ -237,7 +237,7 @@ function Wiring({ f }: { f: Extract<Figure, { kind: 'wiring' }> }) {
 
 /* ---------- Время прихода ---------- */
 function Timeline({ f }: { f: Extract<Figure, { kind: 'timeline' }> }) {
-  const H = 60 + f.events.length * 22, l = 16, r = 16;
+  const W = 380, H = 60 + f.events.length * 22, l = 16, r = 16;
   const X = (t: number) => l + (t / f.span) * (W - l - r);
   return (
     <svg class="diagram fg" viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label={f.title}>
@@ -247,7 +247,7 @@ function Timeline({ f }: { f: Extract<Figure, { kind: 'timeline' }> }) {
         <g>
           <circle class={`dot d-${e.tone === 'accent' ? 'warn' : e.tone === 'info' ? 'ok' : e.tone}`} cx={X(e.t)} cy={30} r={5} />
           <line class={`pl l-muted`} x1={X(e.t)} x2={X(e.t)} y1={30} y2={50 + i * 22} />
-          <text class="t" x={Math.min(X(e.t) + 4, W - 180)} y={54 + i * 22}>{e.label}: {f1(e.t)} мс</text>
+          <text class="t" x={X(e.t) > W / 2 ? X(e.t) - 4 : X(e.t) + 4} text-anchor={X(e.t) > W / 2 ? 'end' : 'start'} y={54 + i * 22}>{e.label}: {f1(e.t)} мс</text>
         </g>
       ))}
     </svg>
@@ -260,7 +260,7 @@ export function TableView({ t }: { t: CalcTable }) {
     <div class="fig">
       <div class="figcap">{t.title}</div>
       <div class="tbl">
-        <table>
+        <table style={{ minWidth: `${Math.min(520, t.head.length * 92)}px` }}>
           <thead><tr>{t.head.map((h) => <th>{h}</th>)}</tr></thead>
           <tbody>
             {t.rows.map((r, i) => (

@@ -508,6 +508,7 @@ details > summary { cursor: pointer; }
 .cbl-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); font-size: 13px; }
 .cbl-item small { color: var(--muted); display: block; }
 @media print {
-  .fig { break-inside: avoid; }
-  .diagram.fg { max-width: 100%; }
+  .calc { break-inside: auto; }
+  .calc .sec, .fig { break-inside: avoid; }
+  .diagram.fg { max-width: 15cm; max-height: 11cm; }
 }
