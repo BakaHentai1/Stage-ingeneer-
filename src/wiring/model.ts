@@ -7,7 +7,7 @@ import { pickStdLength } from '../calc/audio/cable';
 import { cableLoss } from '../calc/audio/cable';
 import { parallelZ } from '../calc/audio/impedance';
 import type { CalcWarning } from '../calc/types';
-import { fx } from '../calc/types';
+import { fx, rn } from '../calc/types';
 
 /* ---------------- Справочники ---------------- */
 
@@ -306,7 +306,7 @@ export function generate(r: Rig): WiringResult {
     const l = std(r.distFoh);
     addCable('Сетевой dSNAKE', 'etherCON — etherCON, Cat5e STP', l, 1, r.distFoh);
     addCable('Сетевой dSNAKE (резерв)', 'etherCON — etherCON, Cat5e STP', l, 1, r.distFoh);
-    if (r.distFoh > 100) warnings.push({ level: 'crit', text: `Расстояние до пульта ${r.distFoh} м: для кабеля Cat5e это больше 100 м. Проверьте допустимую длину dSNAKE в руководстве A&H или перенесите пульт.` });
+    if (r.distFoh > 100) warnings.push({ level: 'crit', text: `Расстояние до пульта ${rn(r.distFoh)} м: для кабеля Cat5e это больше 100 м. Проверьте допустимую длину dSNAKE в руководстве A&H или перенесите пульт.` });
   } else if (transport === 'multicore') {
     addCable('Мультикор', `${r.multicoreIn}/${r.multicoreRet} каналов`, std(r.distFoh), 1, r.distFoh);
   } else if (r.distFoh + r.stageLen > 100) {
@@ -399,11 +399,11 @@ export function generate(r: Rig): WiringResult {
     amps = { channels, units, loadZ };
     addCable('Акустический', SPK, std(r.spkLen), passiveCabs, r.spkLen);
     if (loadZ < r.ampMinZ - 1e-9) {
-      warnings.push({ level: 'crit', text: `${per} кабинета по ${r.passiveZ} Ом на канал дают ${fx(loadZ, 2)} Ом, это ниже минимума усилителя ${r.ampMinZ} Ом.` });
+      warnings.push({ level: 'crit', text: `${per} кабинета по ${rn(r.passiveZ)} Ом на канал дают ${fx(loadZ, 2)} Ом, это ниже минимума усилителя ${rn(r.ampMinZ)} Ом.` });
     }
     const loss = cableLoss({ length: r.spkLen, section: r.spkSection, z: loadZ, lossMax: 0.5 });
     if (!loss.error && loss.warnings.length) {
-      warnings.push({ level: 'warn', text: `Акустический кабель ${r.spkLen} м, ${fx(r.spkSection, 1)} мм² на нагрузку ${fx(loadZ, 1)} Ом: ${loss.warnings[0].text}` });
+      warnings.push({ level: 'warn', text: `Акустический кабель ${rn(r.spkLen)} м, ${fx(r.spkSection, 1)} мм² на нагрузку ${fx(loadZ, 1)} Ом: ${loss.warnings[0].text}` });
     }
     if (r.monitorsType === 'passive' && r.monitors > 0) {
       warnings.push({ level: 'info', text: 'Пассивным мониторам с разными миксами нужен отдельный канал усилителя на каждый.' });

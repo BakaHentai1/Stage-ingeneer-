@@ -84,3 +84,8 @@ export function requireFinite(pairs: [string, number][]): string | null {
 export function fx(n: number, digits = 1): string {
   return n.toFixed(digits).replace('.', ',');
 }
+
+/** Введённое пользователем число в тексте: как ввёл, но с десятичной запятой. */
+export function rn(n: number): string {
+  return String(n).replace('.', ',');
+}

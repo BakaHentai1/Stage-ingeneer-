@@ -1,4 +1,4 @@
-import { CalcResult, CalcWarning, ToolDef, fail, lg, num, requireFinite, fx } from '../types';
+import { CalcResult, CalcWarning, ToolDef, fail, lg, num, requireFinite, fx, rn } from '../types';
 
 /** Удельное сопротивление меди при 20 °C, Ом·мм²/м. */
 export const RHO_CU = 0.0175;
@@ -46,7 +46,7 @@ export function cableLoss(i: CableLossInput): CalcResult {
   const warnings: CalcWarning[] = [];
   const level = loss > i.lossMax ? 'warn' : 'ok';
   if (loss > i.lossMax) {
-    warnings.push({ level: 'warn', text: `Потери ${fx(loss, 2)} дБ больше допустимых ${i.lossMax} дБ: увеличьте сечение или сократите длину.` });
+    warnings.push({ level: 'warn', text: `Потери ${fx(loss, 2)} дБ больше допустимых ${rn(i.lossMax)} дБ: увеличьте сечение или сократите длину.` });
   }
   if (!aStd) {
     warnings.push({ level: 'warn', text: 'Нужно сечение больше 10 мм²: поставьте усилитель ближе к акустике.' });

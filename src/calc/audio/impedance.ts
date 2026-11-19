@@ -1,4 +1,4 @@
-import { CalcResult, CalcWarning, ToolDef, fail, num, fx } from '../types';
+import { CalcResult, CalcWarning, ToolDef, fail, num, fx, rn } from '../types';
 
 export type ImpedanceMode = 'parallel' | 'series' | 'sp';
 
@@ -90,7 +90,7 @@ export function impedance(i: ImpedanceInput): CalcResult {
     level = 'crit';
     warnings.push({
       level: 'crit',
-      text: `Нагрузка ${fx(total, 2)} Ом ниже минимально допустимой ${i.ampMin} Ом. Усилитель может уйти в защиту, перегреться или выйти из строя. Уменьшите число кабинетов на канал или измените схему соединения.`,
+      text: `Нагрузка ${fx(total, 2)} Ом ниже минимально допустимой ${rn(i.ampMin)} Ом. Усилитель может уйти в защиту, перегреться или выйти из строя. Уменьшите число кабинетов на канал или измените схему соединения.`,
     });
   }
   results.push({ label: 'Общий импеданс', value: total, unit: 'Ом', digits: 2, primary: true, level });
