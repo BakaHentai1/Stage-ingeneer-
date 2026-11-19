@@ -1,7 +1,7 @@
 import type { ToolDef } from '../calc/types';
 import { audioTools } from '../calc/audio';
 
-export type ModuleStatus = 'ready' | 'next' | 'planned';
+export type ModuleStatus = 'ready' | 'part' | 'next' | 'planned';
 
 export interface ModuleDef {
   code: string;
@@ -27,8 +27,12 @@ export const MODULES: ModuleDef[] = [
     screens: [{ id: 'wiring', title: 'Генератор схем коммутации', short: 'Patch List, выходы, кабели, схема' }],
   },
   {
-    code: 'C', title: 'Помощник звукорежиссёра', desc: 'Gain, EQ, динамика, фидбэк', status: 'next', tools: [],
-    planned: ['Gain staging для Qu-16, Qu-24 и аналоговых пультов', 'EQ, HPF, LPF по источникам', 'Компрессор и Gate', 'Поиск причин фонового шума', 'Диагностика обратной связи', 'Мониторные линии и маршрутизация'],
+    code: 'C', title: 'Помощник звукорежиссёра', desc: 'патчинг, маршрутизация, Qu-16/24', status: 'part', tools: [],
+    planned: ['Визуальный конструктор коммутации', 'Тренажёр Qu-16 и Qu-24: органы управления и меню', 'Практические задания с проверкой', 'Диагностика: нет сигнала, шум, гул, перегрузка, обратная связь', 'Настройка: Gain, EQ, HPF, Gate, компрессор, FX', 'Справочник разъёмов и панелей, потом разбор фото через ИИ'],
+    screens: [
+      { id: 'patch', title: 'Патчинг входов и выходов', short: 'Input / Output Patch, стейджбокс, проверка ошибок' },
+      { id: 'routing', title: 'Маршрутизация и путь сигнала', short: 'LR, AUX, FX, группы, Matrix, PAFL, Direct Out' },
+    ],
   },
   {
     code: 'D', title: 'Склад техники', desc: 'учёт, комплекты, выдача', status: 'planned', tools: [],

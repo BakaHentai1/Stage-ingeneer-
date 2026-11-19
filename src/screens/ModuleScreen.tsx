@@ -22,7 +22,14 @@ export function ModuleScreen({ code }: { code: string }) {
             </a>
           ))}
         </div>
-      ) : (
+      ) : null}
+      {(m.tools.length || m.screens?.length) && m.planned.length ? (
+        <>
+          <h2 class="h">Скоро в модуле</h2>
+          <ul class="planned">{m.planned.map((p) => <li>{p}</li>)}</ul>
+        </>
+      ) : null}
+      {m.tools.length || m.screens?.length ? null : (
         <>
           <p class="note">
             {m.status === 'next'

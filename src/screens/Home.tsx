@@ -5,7 +5,7 @@ import { setCurrentProject, useCurrentProject } from '../core/state';
 import { fmtDate, daysSince } from '../core/format';
 import { NewProjectForm } from '../ui/ProjectPicker';
 
-const STATUS: Record<string, string> = { ready: 'готов', next: 'следующий', planned: 'в плане' };
+const STATUS: Record<string, string> = { ready: 'готов', part: 'в работе', next: 'следующий', planned: 'в плане' };
 
 export function Home() {
   const [current] = useCurrentProject();

@@ -27,7 +27,7 @@ export interface SavedCalc {
 export interface SavedDoc {
   id: string;
   projectId: string;
-  kind: 'wiring';
+  kind: 'wiring' | 'patch';
   title: string;
   data: unknown;
   createdAt: number;
