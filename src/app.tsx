@@ -5,12 +5,14 @@ import { ModuleScreen, NotFound } from './screens/ModuleScreen';
 import { ToolScreen } from './screens/ToolScreen';
 import { ProjectDetail, Projects } from './screens/Projects';
 import { Settings } from './screens/Settings';
+import { WiringScreen } from './screens/Wiring';
 import { Toast } from './ui/Toast';
 import { IconBox, IconFolder, IconGear, IconHome } from './ui/icons';
 
 function View({ r }: { r: string[] }) {
   if (r.length === 0) return <Home />;
   if (r[0] === 'm' && r[1] && !r[2]) return <ModuleScreen code={r[1]} />;
+  if (r[0] === 'm' && r[1] === 'b' && r[2] === 'wiring') return <WiringScreen />;
   if (r[0] === 'm' && r[1] && r[2]) return <ToolScreen code={r[1]} toolId={r[2]} />;
   if (r[0] === 'projects' && !r[1]) return <Projects />;
   if (r[0] === 'projects' && r[1]) return <ProjectDetail id={r[1]} />;
