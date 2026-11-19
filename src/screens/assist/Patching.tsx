@@ -104,54 +104,16 @@ function chOptions(p: PatchSetup, stereo: boolean): [string, string][] {
   return o;
 }
 
-export function PatchingScreen() {
-  const [p, setP] = useState<PatchSetup>(() => ls.get<PatchSetup>(PATCH_KEY) ?? defaultPatch());
-  const [project] = useCurrentProject();
-  const [asking, setAsking] = useState(false);
-  const res = useMemo(() => checkPatch(p), [p]);
+/** Редактор входов и выходов (используется на экране патчинга и в заданиях). */
+export function PatchEditor({ p, set }: { p: PatchSetup; set: (patch: Partial<PatchSetup>) => void }) {
   const prof = CONSOLES[p.console];
-
-  const set = (patch: Partial<PatchSetup>) => {
-    const n = { ...p, ...patch };
-    setP(n);
-    ls.set(PATCH_KEY, n);
-  };
+  const res = useMemo(() => checkPatch(p), [p]);
   const setIn = (id: string, patch: Partial<InSource>) => set({ inputs: p.inputs.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
   const setOut = (id: string, patch: Partial<OutRow>) => set({ outputs: p.outputs.map((o) => (o.id === id ? { ...o, ...patch } : o)) });
   const socks = socketsAvailable(p);
-  const crit = res.warnings.filter((w) => w.level === 'crit').length;
   const rowWarn = (id: string) => res.warnings.filter((w) => w.row === id);
-
-  const save = async (projectId: string) => {
-    await saveDoc({ projectId, kind: 'patch', title: `Патч, ${prof.label}`, data: p });
-    toast('Патч сохранён в проект');
-    setAsking(false);
-  };
-
   return (
-    <div class="screen">
-      <a class="back no-print" href="#/m/c">‹ Помощник звукорежиссёра</a>
-      <div class="mhead"><span class="code">C</span><h1>Патчинг входов и выходов</h1></div>
-      {project ? <div class="print-only meta">Проект: {project.name}</div> : null}
-
-      <div class="alert info no-print"><b>i</b><span>
-        <p>Патчинг — это два слоя. <b>Физика</b>: какой кабель в какой разъём. <b>Цифра</b>: какой разъём на какой канал и какая шина на какой выход — это назначается в меню пульта.</p>
-      </span></div>
-
-      <section class="panel no-print">
-        <div class="form">
-          <Select id="p-con" label="Пульт" value={p.console} onChange={(v) => set({ console: v })} options={[['qu16', 'A&H Qu-16'], ['qu24', 'A&H Qu-24']]} />
-          <Select id="p-rack" label="Стейджбокс" value={p.rack ?? 'none'}
-            onChange={(v) => set({ rack: v === 'none' ? null : (v as RackId), inputs: v === 'none' ? p.inputs.map((s) => ({ ...s, loc: 'local' as const })) : p.inputs })}
-            options={[['none', 'Нет, всё в пульт'], ...(Object.keys(RACKS) as RackId[]).map((k) => [k, RACKS[k].label] as [string, string])]} />
-          {p.rack ? <NumField id="p-len" label="Cat5e до стейджбокса" unit="м" value={p.snakeLen} min={1} onChange={(n) => set({ snakeLen: n })} /> : null}
-        </div>
-        <div class="chips">
-          <button class="chip-btn" type="button" onClick={() => set(presetBand(p.console))}>Пример: группа</button>
-          <button class="chip-btn" type="button" onClick={() => set(presetConference(p.console))}>Пример: конференция</button>
-          <button class="chip-btn" type="button" onClick={() => set({ inputs: autoAssign(p) })}>Расставить входы по порядку</button>
-        </div>
-      </section>
+    <>
 
       <section class="panel no-print">
         <div class="panel-h"><div class="lbl">Входы ({p.inputs.length})</div></div>
@@ -234,6 +196,15 @@ export function PatchingScreen() {
           <button class="btn" type="button" onClick={() => set({ outputs: [...p.outputs, { id: uid('o'), name: `Выход ${p.outputs.length + 1}`, dest: 'monitor', bus: 'Mix1', leg: null, socket: p.rack ? 'RACK:1' : 'XLR:Mix1' }] })}>+ Выход</button>
         </div>
       </section>
+    </>
+  );
+}
+
+/** Результат проверки патча: ошибки, загрузка, схема, таблицы, шаги. */
+export function PatchReport({ p, res }: { p: PatchSetup; res: PatchResult }) {
+  const prof = CONSOLES[p.console];
+  const crit = res.warnings.filter((w) => w.level === 'crit').length;
+  return (
 
       <section class="calc">
         <div class="calc-h"><span>Проверка патча</span><small>{prof.label}{p.rack ? ` + ${p.rack}` : ''}</small></div>
@@ -289,6 +260,56 @@ export function PatchingScreen() {
           </div>
         ) : null}
       </section>
+  );
+}
+
+export function PatchingScreen() {
+  const [p, setP] = useState<PatchSetup>(() => ls.get<PatchSetup>(PATCH_KEY) ?? defaultPatch());
+  const [project] = useCurrentProject();
+  const [asking, setAsking] = useState(false);
+  const res = useMemo(() => checkPatch(p), [p]);
+  const prof = CONSOLES[p.console];
+
+  const set = (patch: Partial<PatchSetup>) => {
+    const n = { ...p, ...patch };
+    setP(n);
+    ls.set(PATCH_KEY, n);
+  };
+
+  const save = async (projectId: string) => {
+    await saveDoc({ projectId, kind: 'patch', title: `Патч, ${prof.label}`, data: p });
+    toast('Патч сохранён в проект');
+    setAsking(false);
+  };
+
+  return (
+    <div class="screen">
+      <a class="back no-print" href="#/m/c">‹ Помощник звукорежиссёра</a>
+      <div class="mhead"><span class="code">C</span><h1>Патчинг входов и выходов</h1></div>
+      {project ? <div class="print-only meta">Проект: {project.name}</div> : null}
+
+      <div class="alert info no-print"><b>i</b><span>
+        <p>Патчинг — это два слоя. <b>Физика</b>: какой кабель в какой разъём. <b>Цифра</b>: какой разъём на какой канал и какая шина на какой выход — это назначается в меню пульта.</p>
+      </span></div>
+
+      <section class="panel no-print">
+        <div class="form">
+          <Select id="p-con" label="Пульт" value={p.console} onChange={(v) => set({ console: v })} options={[['qu16', 'A&H Qu-16'], ['qu24', 'A&H Qu-24']]} />
+          <Select id="p-rack" label="Стейджбокс" value={p.rack ?? 'none'}
+            onChange={(v) => set({ rack: v === 'none' ? null : (v as RackId), inputs: v === 'none' ? p.inputs.map((s) => ({ ...s, loc: 'local' as const })) : p.inputs })}
+            options={[['none', 'Нет, всё в пульт'], ...(Object.keys(RACKS) as RackId[]).map((k) => [k, RACKS[k].label] as [string, string])]} />
+          {p.rack ? <NumField id="p-len" label="Cat5e до стейджбокса" unit="м" value={p.snakeLen} min={1} onChange={(n) => set({ snakeLen: n })} /> : null}
+        </div>
+        <div class="chips">
+          <button class="chip-btn" type="button" onClick={() => set(presetBand(p.console))}>Пример: группа</button>
+          <button class="chip-btn" type="button" onClick={() => set(presetConference(p.console))}>Пример: конференция</button>
+          <button class="chip-btn" type="button" onClick={() => set({ inputs: autoAssign(p) })}>Расставить входы по порядку</button>
+        </div>
+      </section>
+
+      <PatchEditor p={p} set={set} />
+
+      <PatchReport p={p} res={res} />
 
       <div class="no-print">
         {asking ? (
