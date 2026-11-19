@@ -1,5 +1,6 @@
 import type { ToolDef } from '../calc/types';
 import { audioTools } from '../calc/audio';
+import { assistTools } from '../calc/assist';
 
 export type ModuleStatus = 'ready' | 'part' | 'next' | 'planned';
 
@@ -27,11 +28,17 @@ export const MODULES: ModuleDef[] = [
     screens: [{ id: 'wiring', title: 'Генератор схем коммутации', short: 'Patch List, выходы, кабели, схема' }],
   },
   {
-    code: 'C', title: 'Помощник звукорежиссёра', desc: 'патчинг, маршрутизация, Qu-16/24', status: 'part', tools: [],
-    planned: ['Визуальный конструктор коммутации', 'Тренажёр Qu-16 и Qu-24: органы управления и меню', 'Практические задания с проверкой', 'Диагностика: нет сигнала, шум, гул, перегрузка, обратная связь', 'Настройка: Gain, EQ, HPF, Gate, компрессор, FX', 'Справочник разъёмов и панелей, потом разбор фото через ИИ'],
+    code: 'C', title: 'Помощник звукорежиссёра', desc: 'патчинг, маршрутизация, тренажёр Qu-16/24, диагностика', status: 'ready', tools: assistTools,
+    planned: ['Разбор фото разъёмов и панелей через ИИ-сервис по вашему ключу'],
     screens: [
       { id: 'patch', title: 'Патчинг входов и выходов', short: 'Input / Output Patch, стейджбокс, проверка ошибок' },
       { id: 'routing', title: 'Маршрутизация и путь сигнала', short: 'LR, AUX, FX, группы, Matrix, PAFL, Direct Out' },
+      { id: 'builder', title: 'Конструктор коммутации', short: 'соединить блоки кабелями и проверить' },
+      { id: 'trainer', title: 'Тренажёр Qu-16 / Qu-24', short: 'органы управления, уроки, викторина' },
+      { id: 'tasks', title: 'Практические задания', short: 'конференция, 8 микрофонов, мониторы, поиск ошибок' },
+      { id: 'diag', title: 'Диагностика', short: 'нет сигнала, шум, гул, перегрузка, заводка' },
+      { id: 'tone', title: 'Настройка звука', short: 'Gain, HPF, EQ, Gate, компрессор, FX' },
+      { id: 'connectors', title: 'Разъёмы и панели', short: 'справочник с рисунками, сравнение с фото' },
     ],
   },
   {
