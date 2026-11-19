@@ -1,4 +1,4 @@
-import { CalcResult, ToolDef, fail, lg, num, requireFinite, fx } from '../types';
+import { CalcResult, ToolDef, fail, lg, num, requireFinite, fx, rn } from '../types';
 
 export interface SplInput {
   /** Чувствительность, дБ SPL (1 Вт / 1 м). */
@@ -50,7 +50,7 @@ export function splAtDistance(i: SplInput): CalcResult {
   if (capped) {
     warnings.push({
       level: 'warn',
-      text: `При ${i.power} Вт расчётный уровень ${fx(l1, 1)} дБ выше паспортного максимума ${i.maxSpl} дБ. Взят паспортный максимум: колонка не выдаст больше, лишняя мощность приведёт к компрессии или перегрузке.`,
+      text: `При ${rn(i.power)} Вт расчётный уровень ${fx(l1, 1)} дБ выше паспортного максимума ${rn(i.maxSpl)} дБ. Взят паспортный максимум: колонка не выдаст больше, лишняя мощность приведёт к компрессии или перегрузке.`,
     });
     l1 = i.maxSpl;
   }

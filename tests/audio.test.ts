@@ -167,3 +167,10 @@ describe('Конфигурация акустики', () => {
     expect(r.warnings.some((w) => w.level === 'crit')).toBe(true);
   });
 });
+
+describe('Тексты предупреждений', () => {
+  it('дробные числа пользователя выводятся с запятой', () => {
+    const r = cableLoss({ length: 50, section: 2.5, z: 4, lossMax: 0.5 });
+    expect(r.warnings[0].text).toContain('допустимых 0,5 дБ');
+  });
+});

@@ -1,4 +1,4 @@
-import { CalcResult, CalcWarning, ToolDef, fail, lg, num, requireFinite } from '../types';
+import { CalcResult, CalcWarning, ToolDef, fail, lg, num, requireFinite, rn } from '../types';
 
 export interface AmpInput {
   /** Чувствительность кабинета, дБ (1 Вт / 1 м). */
@@ -44,7 +44,7 @@ export function ampPower(i: AmpInput): CalcResult {
     level = 'crit';
     warnings.push({
       level: 'crit',
-      text: `Нужно ${Math.round(p)} Вт, а кабинет рассчитан на ${i.ratedPower} Вт. Один кабинет не обеспечит ${i.target} дБ на ${i.distance} м с запасом ${i.headroom} дБ: возьмите больше кабинетов, мощнее модель или уменьшите дистанцию.`,
+      text: `Нужно ${Math.round(p)} Вт, а кабинет рассчитан на ${rn(i.ratedPower)} Вт. Один кабинет не обеспечит ${rn(i.target)} дБ на ${rn(i.distance)} м с запасом ${rn(i.headroom)} дБ: возьмите больше кабинетов, мощнее модель или уменьшите дистанцию.`,
     });
   } else if (p > 0.5 * i.ratedPower) {
     level = 'warn';
